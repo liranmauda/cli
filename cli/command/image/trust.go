@@ -30,6 +30,20 @@ type target struct {
 	size   int64
 }
 
+// notaryClientProvider is used in tests to provide a dummy notary client.
+type notaryClientProvider interface {
+	NotaryClient(imgRefAndAuth trust.ImageRefAndAuth, actions []string) (client.Repository, error)
+}
+
+// newNotaryClient provides a Notary Repository to interact with signed metadata for an image.
+func newNotaryClient(cli command.Streams, imgRefAndAuth trust.ImageRefAndAuth) (client.Repository, error) {
+	if ncp, ok := cli.(notaryClientProvider); ok {
+		// notaryClientProvider is used in tests to provide a dummy notary client.
+		return ncp.NotaryClient(imgRefAndAuth, []string{"pull"})
+	}
+	return trust.GetNotaryRepository(cli.In(), cli.Out(), command.UserAgent(), imgRefAndAuth.RepoInfo(), imgRefAndAuth.AuthConfig(), "pull")
+}
+
 // TrustedPush handles content trust pushing of an image
 func TrustedPush(ctx context.Context, cli command.Cli, repoInfo *registry.RepositoryInfo, ref reference.Named, authConfig registrytypes.AuthConfig, options image.PushOptions) error {
 	responseBody, err := cli.Client().ImagePush(ctx, reference.FamiliarString(ref), options)
@@ -48,7 +62,7 @@ func TrustedPush(ctx context.Context, cli command.Cli, repoInfo *registry.Reposi
 func PushTrustedReference(ctx context.Context, ioStreams command.Streams, repoInfo *registry.RepositoryInfo, ref reference.Named, authConfig registrytypes.AuthConfig, in io.Reader) error {
 	// If it is a trusted push we would like to find the target entry which match the
 	// tag provided in the function and then do an AddTarget later.
-	target := &client.Target{}
+	notaryTarget := &client.Target{}
 	// Count the times of calling for handleTarget,
 	// if it is called more that once, that should be considered an error in a trusted push.
 	cnt := 0
@@ -65,12 +79,12 @@ func PushTrustedReference(ctx context.Context, ioStreams command.Streams, repoIn
 			if dgst, err := digest.Parse(pushResult.Digest); err == nil {
 				h, err := hex.DecodeString(dgst.Hex())
 				if err != nil {
-					target = nil
+					notaryTarget = nil
 					return
 				}
-				target.Name = pushResult.Tag
-				target.Hashes = data.Hashes{string(dgst.Algorithm()): h}
-				target.Length = int64(pushResult.Size)
+				notaryTarget.Name = pushResult.Tag
+				notaryTarget.Hashes = data.Hashes{string(dgst.Algorithm()): h}
+				notaryTarget.Length = int64(pushResult.Size)
 			}
 		}
 	}
@@ -99,7 +113,7 @@ func PushTrustedReference(ctx context.Context, ioStreams command.Streams, repoIn
 		return errors.Errorf("internal error: only one call to handleTarget expected")
 	}
 
-	if target == nil {
+	if notaryTarget == nil {
 		return errors.Errorf("no targets found, provide a specific tag in order to sign it")
 	}
 
@@ -134,10 +148,10 @@ func PushTrustedReference(ctx context.Context, ioStreams command.Streams, repoIn
 			return trust.NotaryError(repoInfo.Name.Name(), err)
 		}
 		_, _ = fmt.Fprintf(ioStreams.Out(), "Finished initializing %q\n", repoInfo.Name.Name())
-		err = repo.AddTarget(target, data.CanonicalTargetsRole)
+		err = repo.AddTarget(notaryTarget, data.CanonicalTargetsRole)
 	case nil:
 		// already initialized and we have successfully downloaded the latest metadata
-		err = AddTargetToAllSignableRoles(repo, target)
+		err = trust.AddToAllSignableRoles(repo, notaryTarget)
 	default:
 		return trust.NotaryError(repoInfo.Name.Name(), err)
 	}
@@ -153,19 +167,6 @@ func PushTrustedReference(ctx context.Context, ioStreams command.Streams, repoIn
 
 	_, _ = fmt.Fprintf(ioStreams.Out(), "Successfully signed %s:%s\n", repoInfo.Name.Name(), tag)
 	return nil
-}
-
-// AddTargetToAllSignableRoles attempts to add the image target to all the top level delegation roles we can
-// (based on whether we have the signing key and whether the role's path allows
-// us to).
-// If there are no delegation roles, we add to the targets role.
-func AddTargetToAllSignableRoles(repo client.Repository, target *client.Target) error {
-	signableRoles, err := trust.GetSignableRoles(repo, target)
-	if err != nil {
-		return err
-	}
-
-	return repo.AddTarget(target, signableRoles...)
 }
 
 // trustedPull handles content trust pulling of an image
@@ -213,7 +214,7 @@ func trustedPull(ctx context.Context, cli command.Cli, imgRefAndAuth trust.Image
 }
 
 func getTrustedPullTargets(cli command.Cli, imgRefAndAuth trust.ImageRefAndAuth) ([]target, error) {
-	notaryRepo, err := cli.NotaryClient(imgRefAndAuth, trust.ActionsPullOnly)
+	notaryRepo, err := newNotaryClient(cli, imgRefAndAuth)
 	if err != nil {
 		return nil, errors.Wrap(err, "error establishing connection to trust repository")
 	}
@@ -293,7 +294,7 @@ func TrustedReference(ctx context.Context, cli command.Cli, ref reference.NamedT
 		return nil, err
 	}
 
-	notaryRepo, err := cli.NotaryClient(imgRefAndAuth, []string{"pull"})
+	notaryRepo, err := newNotaryClient(cli, imgRefAndAuth)
 	if err != nil {
 		return nil, errors.Wrap(err, "error establishing connection to trust repository")
 	}
