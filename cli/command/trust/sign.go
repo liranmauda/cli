@@ -52,7 +52,7 @@ func runSignImage(ctx context.Context, dockerCLI command.Cli, options signOption
 		return err
 	}
 
-	notaryRepo, err := dockerCLI.NotaryClient(imgRefAndAuth, trust.ActionsPushAndPull)
+	notaryRepo, err := newNotaryClient(dockerCLI, imgRefAndAuth, trust.ActionsPushAndPull)
 	if err != nil {
 		return trust.NotaryError(imgRefAndAuth.Reference().Name(), err)
 	}
@@ -116,7 +116,7 @@ func signAndPublishToTarget(out io.Writer, imgRefAndAuth trust.ImageRefAndAuth, 
 	if err != nil {
 		return err
 	}
-	err = image.AddTargetToAllSignableRoles(notaryRepo, &target)
+	err = trust.AddToAllSignableRoles(notaryRepo, &target)
 	if err == nil {
 		prettyPrintExistingSignatureInfo(out, existingSigInfo)
 		err = notaryRepo.Publish()
