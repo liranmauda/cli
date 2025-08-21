@@ -5,15 +5,13 @@ import (
 
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 
 	"github.com/spf13/cobra"
 )
 
-// NewManifestCommand returns a cobra command for `manifest` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewManifestCommand(dockerCLI command.Cli) *cobra.Command {
-	return newManifestCommand(dockerCLI)
+func init() {
+	commands.Register(newManifestCommand)
 }
 
 // newManifestCommand returns a cobra command for `manifest` subcommands

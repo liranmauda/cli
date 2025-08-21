@@ -4,17 +4,16 @@ import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/command/completion"
+	"github.com/docker/cli/internal/commands"
 	"github.com/moby/moby/api/types/swarm"
 	"github.com/spf13/cobra"
 )
 
-// NewConfigCommand returns a cobra command for `config` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewConfigCommand(dockerCLI command.Cli) *cobra.Command {
-	return newConfigCommand(dockerCLI)
+func init() {
+	commands.Register(newConfigCommand)
 }
 
+// newConfigCommand returns a cobra command for `config` subcommands
 func newConfigCommand(dockerCLI command.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",

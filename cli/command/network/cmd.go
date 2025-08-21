@@ -3,14 +3,12 @@ package network
 import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 	"github.com/spf13/cobra"
 )
 
-// NewNetworkCommand returns a cobra command for `network` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewNetworkCommand(dockerCLI command.Cli) *cobra.Command {
-	return newNetworkCommand(dockerCLI)
+func init() {
+	commands.Register(newNetworkCommand)
 }
 
 // newNetworkCommand returns a cobra command for `network` subcommands

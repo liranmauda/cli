@@ -4,17 +4,16 @@ import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/command/completion"
+	"github.com/docker/cli/internal/commands"
 	"github.com/moby/moby/api/types/swarm"
 	"github.com/spf13/cobra"
 )
 
-// NewSecretCommand returns a cobra command for `secret` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewSecretCommand(dockerCLI command.Cli) *cobra.Command {
-	return newSecretCommand(dockerCLI)
+func init() {
+	commands.Register(newSecretCommand)
 }
 
+// newSecretCommand returns a cobra command for `secret` subcommands.
 func newSecretCommand(dockerCLI command.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "secret",

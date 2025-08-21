@@ -3,14 +3,12 @@ package volume
 import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 	"github.com/spf13/cobra"
 )
 
-// NewVolumeCommand returns a cobra command for `volume` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewVolumeCommand(dockerCLI command.Cli) *cobra.Command {
-	return newVolumeCommand(dockerCLI)
+func init() {
+	commands.Register(newVolumeCommand)
 }
 
 // newVolumeCommand returns a cobra command for `volume` subcommands

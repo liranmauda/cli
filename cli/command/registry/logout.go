@@ -7,16 +7,14 @@ import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/config/credentials"
+	"github.com/docker/cli/internal/commands"
 	"github.com/docker/cli/internal/oauth/manager"
 	"github.com/docker/cli/internal/registry"
 	"github.com/spf13/cobra"
 )
 
-// NewLogoutCommand creates a new `docker logout` command
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewLogoutCommand(dockerCLI command.Cli) *cobra.Command {
-	return newLogoutCommand(dockerCLI)
+func init() {
+	commands.Register(newLogoutCommand)
 }
 
 // newLogoutCommand creates a new `docker logout` command

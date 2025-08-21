@@ -3,14 +3,12 @@ package plugin
 import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 	"github.com/spf13/cobra"
 )
 
-// NewPluginCommand returns a cobra command for `plugin` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewPluginCommand(dockerCLI command.Cli) *cobra.Command {
-	return newPluginCommand(dockerCLI)
+func init() {
+	commands.Register(newPluginCommand)
 }
 
 // newPluginCommand returns a cobra command for `plugin` subcommands

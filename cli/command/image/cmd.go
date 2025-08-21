@@ -3,14 +3,22 @@ package image
 import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 	"github.com/spf13/cobra"
 )
 
-// NewImageCommand returns a cobra command for `image` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewImageCommand(dockerCLI command.Cli) *cobra.Command {
-	return newImageCommand(dockerCLI)
+func init() {
+	commands.Register(newBuildCommand)
+	commands.Register(newPullCommand)
+	commands.Register(newPushCommand)
+	commands.Register(newImagesCommand)
+	commands.Register(newImageCommand)
+	commands.RegisterLegacy(newHistoryCommand)
+	commands.RegisterLegacy(newImportCommand)
+	commands.RegisterLegacy(newLoadCommand)
+	commands.RegisterLegacy(newRemoveCommand)
+	commands.RegisterLegacy(newSaveCommand)
+	commands.RegisterLegacy(newTagCommand)
 }
 
 // newImageCommand returns a cobra command for `image` subcommands

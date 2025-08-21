@@ -7,14 +7,12 @@ import (
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/command/completion"
 	"github.com/docker/cli/cli/command/stack/swarm"
+	"github.com/docker/cli/internal/commands"
 	"github.com/spf13/cobra"
 )
 
-// NewStackCommand returns a cobra command for `stack` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewStackCommand(dockerCLI command.Cli) *cobra.Command {
-	return newStackCommand(dockerCLI)
+func init() {
+	commands.Register(newStackCommand)
 }
 
 // newStackCommand returns a cobra command for `stack` subcommands

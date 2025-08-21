@@ -3,14 +3,12 @@ package service
 import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 	"github.com/spf13/cobra"
 )
 
-// NewServiceCommand returns a cobra command for `service` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewServiceCommand(dockerCLI command.Cli) *cobra.Command {
-	return newServiceCommand(dockerCLI)
+func init() {
+	commands.Register(newServiceCommand)
 }
 
 // newServiceCommand returns a cobra command for `service` subcommands

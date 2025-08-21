@@ -6,16 +6,14 @@ import (
 
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 	"github.com/moby/moby/api/types/swarm"
 	"github.com/moby/moby/client"
 	"github.com/spf13/cobra"
 )
 
-// NewNodeCommand returns a cobra command for `node` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewNodeCommand(dockerCLI command.Cli) *cobra.Command {
-	return newNodeCommand(dockerCLI)
+func init() {
+	commands.Register(newNodeCommand)
 }
 
 // newNodeCommand returns a cobra command for `node` subcommands

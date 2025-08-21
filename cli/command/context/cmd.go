@@ -3,14 +3,12 @@ package context
 import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 	"github.com/spf13/cobra"
 )
 
-// NewContextCommand returns the context cli subcommand
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewContextCommand(dockerCLI command.Cli) *cobra.Command {
-	return newContextCommand(dockerCLI)
+func init() {
+	commands.Register(newContextCommand)
 }
 
 // newContextCommand returns the context cli subcommand

@@ -5,13 +5,11 @@ import (
 
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 )
 
-// NewSwarmCommand returns a cobra command for `swarm` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewSwarmCommand(dockerCLI command.Cli) *cobra.Command {
-	return newSwarmCommand(dockerCLI)
+func init() {
+	commands.Register(newSwarmCommand)
 }
 
 // newSwarmCommand returns a cobra command for `swarm` subcommands

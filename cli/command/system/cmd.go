@@ -3,14 +3,16 @@ package system
 import (
 	"github.com/docker/cli/cli"
 	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/internal/commands"
 	"github.com/spf13/cobra"
 )
 
-// NewSystemCommand returns a cobra command for `system` subcommands
-//
-// Deprecated: Do not import commands directly. They will be removed in a future release.
-func NewSystemCommand(dockerCLI command.Cli) *cobra.Command {
-	return newSystemCommand(dockerCLI)
+func init() {
+	commands.Register(newVersionCommand)
+	commands.Register(newInfoCommand)
+	commands.Register(newSystemCommand)
+	commands.RegisterLegacy(newEventsCommand)
+	commands.RegisterLegacy(newInspectCommand)
 }
 
 // newSystemCommand returns a cobra command for `system` subcommands
